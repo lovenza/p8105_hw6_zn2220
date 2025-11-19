@@ -375,6 +375,7 @@ homicides_raw &lt;- read_csv(data_url) </code></pre>
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>homicides &lt;- homicides_raw %&gt;% 
+  janitor::clean_names() %&gt;% 
   mutate(
     city_state = str_c(city, state, sep = &quot;, &quot;),
     solved = if_else(disposition == &quot;Closed by arrest&quot;, 1, 0)
@@ -384,6 +385,8 @@ homicides_raw &lt;- read_csv(data_url) </code></pre>
 <h2>Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these
 don’t report victim race. Also omit Tulsa, AL – this is a data entry
 mistake.</h2>
+<pre class="r"><code>homicides &lt;- homicides %&gt;% 
+  filter(!city_state %in% c(&quot;Dallas, TX&quot;, &quot;Phoenix, AZ&quot;, &quot;Kansas City, MO&quot;, &quot;Tulsa, AL&quot;))</code></pre>
 </div>
 </div>
 
