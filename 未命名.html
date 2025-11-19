@@ -388,6 +388,21 @@ mistake.</h2>
 <pre class="r"><code>homicides &lt;- homicides %&gt;% 
   filter(!city_state %in% c(&quot;Dallas, TX&quot;, &quot;Phoenix, AZ&quot;, &quot;Kansas City, MO&quot;, &quot;Tulsa, AL&quot;))</code></pre>
 </div>
+<div id="limit-your-analysis-those-for-whom-victim_race-is-white-or-black.-be-sure-that-victim_age-is-numeric." class="section level2">
+<h2>Limit your analysis those for whom victim_race is white or black. Be
+sure that victim_age is numeric.</h2>
+<pre class="r"><code>homicides &lt;- homicides %&gt;% 
+  filter(
+    victim_race %in% c(&quot;Black&quot;, &quot;White&quot;)
+    ) %&gt;% 
+  mutate(
+    victim_age = as.numeric(victim_age) 
+  )</code></pre>
+<pre><code>## Warning: There was 1 warning in `mutate()`.
+## ℹ In argument: `victim_age = as.numeric(victim_age)`.
+## Caused by warning:
+## ! NAs introduced by coercion</code></pre>
+</div>
 </div>
 
 

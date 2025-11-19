@@ -35,3 +35,15 @@ homicides <- homicides_raw %>%
 homicides <- homicides %>% 
   filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))
 ```
+
+## Limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
+
+```{r}
+homicides <- homicides %>% 
+  filter(
+    victim_race %in% c("Black", "White")
+    ) %>% 
+  mutate(
+    victim_age = as.numeric(victim_age) 
+  )
+```
