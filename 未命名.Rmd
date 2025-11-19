@@ -43,7 +43,8 @@ homicides <- homicides %>%
 homicides <- homicides %>% 
   filter(
     victim_race %in% c("Black", "White"),
-    !victim_age %in% c("Unknown")
+    !victim_age %in% c("Unknown"),
+    !victim_sex %in% c("Unknown")
     ) %>% 
   mutate(
     victim_age = as.numeric(victim_age) 
@@ -60,13 +61,38 @@ fit <- glm(solved ~ victim_age + victim_sex + victim_race,
            data = baltimore_data, 
            family = binomial)
 
-results <- broom::tidy(fit, conf.int = TRUE, exponentiate = TRUE)
+balitmore_glm_results <- broom::tidy(fit, conf.int = TRUE, exponentiate = TRUE)
 
-male_vs_female <- results %>% 
+balitmore_gender_results <- balitmore_glm_results %>% 
   filter(term == "victim_sexMale") %>% 
   select(term, estimate, conf.low, conf.high)
 
-print(male_vs_female)
+print(balitmore_glm_results)
+print(balitmore_gender_results)
 ```
 
-Holding victim age and race constant, the odds of resolving a homicide case for a male victim are approximately 57% (1 - 0.426) lower than for a female victim in Baltimore.
+Holding victim age and race constant, the odds of resolving a homicide case for a male victim are approximately 57.4% (1 - 0.426) lower than for a female victim in Baltimore.
+
+## Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city.
+
+```{r}
+city_glm_results <- homicides %>%
+  nest(data = -city_state) %>% 
+  mutate(
+    fit = map(data, function(df) {
+      glm(solved ~ victim_sex + victim_age + victim_race, 
+          data = df, 
+          family = binomial)
+    }),
+    tidied = map(fit, ~tidy(., conf.int = TRUE, exponentiate = TRUE))
+  ) %>% 
+  unnest(tidied) %>% 
+  select(-data, -fit)
+
+city_gender_results <- city_glm_results %>% 
+  filter(term == "victim_sexMale") %>% 
+  select(city_state, estimate, conf.low, conf.high)
+
+summary(city_glm_results)
+knitr::kable(city_gender_results)
+```
