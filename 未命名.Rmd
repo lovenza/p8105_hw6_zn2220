@@ -69,4 +69,4 @@ male_vs_female <- results %>%
 print(male_vs_female)
 ```
 
-Holding victim age and race constant, the odds of resolving a homicide case for a male victim are approximately 57% $/(1 - 0.426)$ lower than for a female victim in Baltimore.
+Holding victim age and race constant, the odds of resolving a homicide case for a male victim are approximately 57% (1 - 0.426) lower than for a female victim in Baltimore.
