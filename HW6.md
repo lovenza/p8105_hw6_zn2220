@@ -216,7 +216,7 @@ city_gender_results %>%
   theme_minimal()
 ```
 
-![](未命名_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](HW6_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 This forest plot reveals a consistent systemic trend across major U.S.
 cities where homicides involving male victims are significantly less
