@@ -1,0 +1,15 @@
+---
+title: "p8105_hw6_zn2220"
+author: "Ziang Niu"
+date: "2025-11-25"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(broom)
+library(p8105.datasets)
+library(modelr)
+```
+
