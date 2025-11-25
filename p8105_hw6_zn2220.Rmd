@@ -290,6 +290,8 @@ cv_results |>
 
 Comparing the proposed model against two others using 100-fold cross-validation. The violin plot of Root Mean Squared Errors (RMSE) shows:
 
-+ Main Effects Model (Length + Gestational Age): This model has the highest RMSE (distribution centered above 325), indicating it has the poorest predictive performance among the three. * Interaction Model (Head + Length + Sex interactions): This model performs significantly better than the main effects model, with a lower RMSE distribution .
++ Main Effects Model (Length + Gestational Age): This model has the highest RMSE (distribution centered above 325), indicating it has the poorest predictive performance among the three. 
+
++ Interaction Model (Head + Length + Sex interactions): This model performs significantly better than the main effects model, with a lower RMSE distribution .
 
 + Proposed Model: My proposed model, which includes a broader range of predictors (including mother's weight gain, smoking habits, etc.), achieved the lowest RMSE (centered around 275). This suggests that incorporating maternal health and behavioral factors alongside infant biometrics provides the most accurate prediction of birthweight in this dataset.
