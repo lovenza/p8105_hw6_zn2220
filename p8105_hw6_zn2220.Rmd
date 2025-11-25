@@ -13,3 +13,112 @@ library(p8105.datasets)
 library(modelr)
 ```
 
+# Problem 1
+
+## Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved.
+
+Binary variable: 1 if Closed by arrest, 0 otherwise
+
+```{r}
+data_url <- "https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv"
+
+homicides_raw <- read_csv(data_url) 
+
+homicides <- homicides_raw %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    city_state = str_c(city, state, sep = ", "),
+    solved = disposition == "Closed by arrest"
+  )
+```
+
+## Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake.
+
+```{r}
+homicides <- homicides %>% 
+  filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))
+```
+
+## Limit your analysis those for whom victim_race is white or black. Be sure that victim_age is numeric.
+
+```{r}
+homicides <- homicides %>% 
+  filter(
+    victim_race %in% c("Black", "White"),
+    !victim_age %in% c("Unknown"),
+    !victim_sex %in% c("Unknown")
+    ) %>% 
+  mutate(
+    victim_age = as.numeric(victim_age) 
+  )
+```
+
+## For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors. Save the output of glm as an R object; apply the broom::tidy to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed.
+
+```{r}
+baltimore_data <- homicides %>% 
+  filter(city_state == "Baltimore, MD")
+
+fit <- glm(solved ~ victim_age + victim_sex + victim_race, 
+           data = baltimore_data, 
+           family = binomial)
+
+balitmore_glm_results <- broom::tidy(fit, conf.int = TRUE, exponentiate = TRUE)
+
+balitmore_gender_results <- balitmore_glm_results %>% 
+  filter(term == "victim_sexMale") %>% 
+  select(term, estimate, conf.low, conf.high)
+
+print(balitmore_glm_results)
+print(balitmore_gender_results)
+```
+
+Holding victim age and race constant, the odds of resolving a homicide case for a male victim are approximately 57.4% (1 - 0.426) lower than for a female victim in Baltimore.
+
+## Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing male victims to female victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city.
+
+```{r}
+city_glm_results <- homicides %>%
+  nest(data = -city_state) %>% 
+  mutate(
+    fit = map(data, function(df) {
+      glm(solved ~ victim_sex + victim_age + victim_race, 
+          data = df, 
+          family = binomial)
+    }),
+    tidied = map(fit, ~tidy(., conf.int = TRUE, exponentiate = TRUE))
+  ) %>% 
+  unnest(tidied) %>% 
+  select(-data, -fit)
+
+city_gender_results <- city_glm_results %>% 
+  filter(term == "victim_sexMale") %>% 
+  select(city_state, estimate, conf.low, conf.high)
+
+summary(city_glm_results)
+knitr::kable(city_gender_results)
+```
+
+In the vast majority of these cities, the estimated odds ratio is below 1.0, indicating that homicides involving male victims are less likely to be solved than those involving female victims.
+
+For many major cities (such as New York, Chicago, and Baltimore), this disparity is statistically significant because the entire confidence interval falls below 1.0. While a few cities (like Albuquerque and Stockton) show an estimate greater than 1.0, their confidence intervals are very wide and include the number 1, meaning there is no statistical evidence that male cases are solved at a higher rate in any of these cities.
+
+## Create a plot that shows the estimated ORs and CIs for each city. Organize cities according to estimated OR, and comment on the plot.
+
+```{r}
+city_gender_results %>%
+  mutate(city_state = fct_reorder(city_state, estimate)) %>%
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  coord_flip() +
+  labs(
+    title = "Odds Ratios for Solving Homicides (Male vs Female)",
+    x = "City",
+    y = "Odds Ratio"
+  ) +
+  theme_minimal()
+```
+
+This forest plot reveals a consistent systemic trend across major U.S. cities where homicides involving male victims are significantly less likely to be solved than those involving female victims, as indicated by the vast majority of odds ratios falling to the left of the red reference line (OR < 1). Cities with narrower confidence intervals, such as New York, Chicago, and Baltimore, show a statistically significant disparity, confirming that the lower clearance rate for males in these locations is not due to random chance. Conversely, the cities at the top of the chart, like Albuquerque and Stockton, display extremely wide error bars that cross the threshold of 1, reflecting high uncertainty or smaller sample sizes rather than a definitive absence of bias.
