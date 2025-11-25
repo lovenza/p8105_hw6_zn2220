@@ -250,7 +250,9 @@ birthweight_df |>
   )
 ```
 
-## Compare your model to two others & 4. Make this comparison in terms of the cross-validated prediction error
+The plot of model residuals against fitted values reveals that for the majority of the data (central mass), the residuals are clustered around zero, indicating that the model fits reasonably well for babies with average birthweights. However, there is some evidence of non-linearity or uncaptured variance at lower predicted birthweights, where residuals tend to be positive. This suggests the model may slightly underpredict the weight of smaller babies or that other factors are influencing low birthweight outcomes.
+
+## Compare your model to two others & Make this comparison in terms of the cross-validated prediction error
 
 ```{r}
 cv_df = 
@@ -285,3 +287,9 @@ cv_results |>
   ggplot(aes(x = model, y = rmse)) + 
   geom_violin()
 ```
+
+Comparing the proposed model against two others using 100-fold cross-validation. The violin plot of Root Mean Squared Errors (RMSE) shows:
+
++ Main Effects Model (Length + Gestational Age): This model has the highest RMSE (distribution centered above 325), indicating it has the poorest predictive performance among the three. * Interaction Model (Head + Length + Sex interactions): This model performs significantly better than the main effects model, with a lower RMSE distribution .
+
++ Proposed Model: My proposed model, which includes a broader range of predictors (including mother's weight gain, smoking habits, etc.), achieved the lowest RMSE (centered around 275). This suggests that incorporating maternal health and behavioral factors alongside infant biometrics provides the most accurate prediction of birthweight in this dataset.
