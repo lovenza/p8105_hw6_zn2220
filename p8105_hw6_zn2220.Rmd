@@ -135,6 +135,8 @@ weather_data =
   select(tmax, tmin, prcp) %>% 
   drop_na()
 
+set.seed(235)
+
 boot_straps = 
   weather_data %>% 
   bootstrap(n = 5000) %>% 
